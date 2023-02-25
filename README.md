@@ -1,4 +1,1 @@
-# Submission to 2023 GDSC Solution Challenge
-## Contents TBD
-
-Team MonkeyTech
+This repository contains the GUI for the flutter based Web/Mobile App
