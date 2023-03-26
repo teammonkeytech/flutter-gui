@@ -19,7 +19,14 @@ class MessagesScreen extends StatelessWidget {
                           : null)),
           SafeArea(
               child: Row(children: [
-            Expanded(child: TextField(controller: controller)),
+            Expanded(
+                child: TextField(
+                    controller: controller,
+                    onSubmitted: (value) {
+                      // TODO: submit text in `controller`
+                      print(controller.text);
+                      controller.clear();
+                    })),
             IconButton(
               icon: Icon(Icons.arrow_circle_up),
               onPressed: () {
