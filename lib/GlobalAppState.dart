@@ -34,6 +34,6 @@ class GlobalAppState extends ChangeNotifier {
 
   static bool validateChannel(String? channel) {
     // TODO: Validate channel format
-    return channel != null;
+    return channel != null && channel != "";
   }
 }

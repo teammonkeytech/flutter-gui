@@ -83,17 +83,16 @@ class _MyHomePageState extends State<MyHomePage> {
                   },
                   destinations: [
                 NavigationRailDestination(
-                  icon: Icon(Icons.home),
-                  label: Text('Server/Channel'),
+                  icon: const Icon(Icons.attach_file),
+                  label: const Text('Server/Channel'),
                 ),
                 NavigationRailDestination(
-                  icon: Icon(Icons.home),
-                  label: Text('Text'),
+                  icon: const Icon(Icons.article),
+                  label: const Text('Text'),
                 ),
               ])),
           Expanded(
               child: Container(
-            //color: Theme.of(context).colorScheme.primaryContainer,
             child: page,
           ))
         ],
