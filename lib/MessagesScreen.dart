@@ -11,6 +11,7 @@ class MessagesScreen extends StatelessWidget {
           Expanded(
               child: ListView.builder(
                   reverse: true,
+                  // TODO: retrieve messages lazily
                   itemBuilder: (context, index) => index <= 1
                       ? Text("A")
                       : index < 10
@@ -19,7 +20,14 @@ class MessagesScreen extends StatelessWidget {
           SafeArea(
               child: Row(children: [
             Expanded(child: TextField(controller: controller)),
-            Icon(Icons.arrow_circle_up)
+            IconButton(
+              icon: Icon(Icons.arrow_circle_up),
+              onPressed: () {
+                // TODO: submit text in `controller`
+                print(controller.text);
+                controller.clear();
+              },
+            )
           ]))
         ]));
   }
