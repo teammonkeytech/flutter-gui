@@ -27,12 +27,12 @@ class GlobalAppState extends ChangeNotifier {
     }
   }
 
-  bool validateAddress(String? address) {
+  static bool validateAddress(String? address) {
     // TODO: Validate address format
-    return address != null && address != "";
+    return address != null && address != "" && address != "Hello";
   }
 
-  bool validateChannel(String? channel) {
+  static bool validateChannel(String? channel) {
     // TODO: Validate channel format
     return channel != null;
   }

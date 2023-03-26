@@ -4,7 +4,6 @@ import 'package:provider/provider.dart';
 
 import 'ServerChannelSelector.dart';
 import 'MessagesScreen.dart';
-import 'GlobalAppState.dart';
 
 void main() {
   runApp(const MyApp());
