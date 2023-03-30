@@ -1,6 +1,3 @@
-import 'dart:html';
-import 'dart:js_util';
-
 import 'package:flutter/material.dart';
 
 class GlobalAppState extends ChangeNotifier {
