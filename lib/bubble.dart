@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'constants.dart';
 import 'utility.dart';
 import 'user.dart';
+import 'message.dart' show Message;
 
 class Bubble {
   int? bid; // Bubble ID
@@ -38,5 +39,9 @@ class Bubble {
             .body);
   }
 
-  msgRequest(LocalUser localUser) {}
+  msgRequest(LocalUser localUser) {
+    var data = {'uid': localUser.getUid, 'bid': getBid};
+    var msgs = postJsonRequest('$baseURL/bubble/messageRequest', data);
+    // TODO: Finish function
+  }
 }
