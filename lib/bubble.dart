@@ -1,11 +1,14 @@
-import 'package:http/http.dart' as http;
-import 'dart:convert' as convert;
+import 'dart:convert';
 
 import 'constants.dart';
+import 'utility.dart';
+import 'user.dart';
 
 class Bubble {
-  int? bid;
-  Map<String, dynamic> uids = {};
+  int? bid; // Bubble ID
+  var uids = Future<Map<String, dynamic>>.value({});
+
+  static const baseURL = 'http://$hostname:$port/api';
 
   Bubble({this.bid}) {
     if (bid != null) {
@@ -13,16 +16,27 @@ class Bubble {
     }
   }
 
-  get getBid => bid;
-  get getUids => uids.isEmpty ? connect() : uids;
+  int? get getBid => bid;
+  Future<Map<String, dynamic>> get getUids async =>
+      (await uids).isEmpty ? connect() : uids;
 
   Future<Map<String, dynamic>> connect() async {
-    var client = http.Client();
-    var uri = Uri.parse("http://$hostname:$port/api/bubble/uids");
-    var response = await client.post(uri, body: {"bid": bid.toString()});
-    uids = convert.jsonDecode(response.body) as Map<String, dynamic>;
-    return uids;
+    uids = postJsonRequest('$baseURL/bubble/uids', {"bid": bid})
+        .then((response) => json.decode(response.body));
+    return await uids;
   }
 
-  void invite(user) {}
+  Future<void> invite(User user) async {
+    var status = postJsonRequest(
+        '$baseURL/bubble/invite', {'bid': getBid, 'uid': user.getUid});
+    print((await status).body);
+  }
+
+  void newBubble(User user) async {
+    bid = int.parse(
+        (await postJsonRequest('$baseURL/bubble/new', {'uid': user.getUid}))
+            .body);
+  }
+
+  msgRequest(LocalUser localUser) {}
 }

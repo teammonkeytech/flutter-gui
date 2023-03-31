@@ -4,5 +4,6 @@ import 'dart:convert';
 Future<Response> postJsonRequest(
     String url, Map<String, dynamic> jsonMap) async {
   return await post(Uri.parse(url),
-      body: jsonEncode(jsonMap), headers: {"content-type": "application/json"});
+      body: json.encode(jsonMap),
+      headers: {"content-type": "application/json"});
 }

@@ -2,7 +2,7 @@ import 'user.dart';
 import 'bubble.dart';
 
 class Message {
-  User author;
+  LocalUser author;
   Bubble bubble;
   String content;
 
