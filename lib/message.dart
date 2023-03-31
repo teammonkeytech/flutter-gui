@@ -1,5 +1,5 @@
-import 'User.dart';
-import 'Bubble.dart';
+import 'user.dart';
+import 'bubble.dart';
 
 class Message {
   User author;

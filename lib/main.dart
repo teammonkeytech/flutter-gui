@@ -1,12 +1,9 @@
 import 'package:flutter/material.dart';
-import 'package:gui_flutter/GlobalAppState.dart';
+import 'package:gui_flutter/global_app_state.dart';
 import 'package:provider/provider.dart';
 
-import 'ServerChannelSelector.dart';
-import 'MessagesScreen.dart';
-
-import 'package:http/http.dart';
-import 'constants.dart';
+import 'server_channel_selector.dart';
+import 'messages_screen.dart';
 
 void main() {
   runApp(const MyApp());

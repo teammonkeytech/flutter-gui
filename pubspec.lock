@@ -188,7 +188,7 @@ packages:
     source: hosted
     version: "1.8.2"
   pointycastle:
-    dependency: transitive
+    dependency: "direct main"
     description:
       name: pointycastle
       sha256: c3120a968135aead39699267f4c74bc9a08e4e909e86bc1b0af5bfd78691123c
@@ -203,6 +203,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "5.0.0"
+  rsa_pkcs:
+    dependency: "direct main"
+    description:
+      name: rsa_pkcs
+      sha256: "17a52b0c010319f0d4c7bcc635eb89e2efeaec44975b3fb45f850b350a2b0513"
+      url: "https://pub.dev"
+    source: hosted
+    version: "2.0.1"
   sky_engine:
     dependency: transitive
     description: flutter

@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:gui_flutter/GlobalAppState.dart';
+import 'package:gui_flutter/global_app_state.dart';
 import 'package:provider/provider.dart';
 
 class ServerChannelSelector extends StatelessWidget {
