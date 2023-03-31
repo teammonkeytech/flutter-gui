@@ -40,6 +40,7 @@ dependencies:
   encrypt: ^5.0.1
   rsa_pkcs: ^2.0.1
   pointycastle: ^3.7.2
+  cryptography: ^2.5.0
 
 dev_dependencies:
   flutter_test:

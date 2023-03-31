@@ -7,4 +7,6 @@ class Message {
   String content;
 
   Message({required this.author, required this.bubble, required this.content});
+
+  void commit() {}
 }
