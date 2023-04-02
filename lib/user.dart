@@ -2,12 +2,13 @@ import 'dart:io' as io;
 
 import 'package:basic_utils/basic_utils.dart'
     show CryptoUtils, RSAPublicKey, RSAPrivateKey;
+import 'package:http/http.dart' show Response;
 
 import 'utility.dart';
 
 abstract class User {
-  String get username;
-  int get uid;
+  Future<String> get username;
+  Future<int> get uid;
   RSAPublicKey get pubKey;
 
   String encrypt(String ciphertext) {
@@ -16,10 +17,13 @@ abstract class User {
 }
 
 class LocalUser extends User {
+  final String _username;
+  int _uid = -1;
+
   @override
-  final String username;
+  Future<String> get username => Future<String>.value(_username);
   @override
-  late final int uid;
+  Future<int> get uid => Future<int>.value(_uid);
 
   final String baseURL;
 
@@ -28,35 +32,41 @@ class LocalUser extends User {
   late final RSAPublicKey pubKey;
   final String password;
 
+  io.Directory localDir;
+
   LocalUser(
-      {required this.username, required this.password, required String url})
-      : baseURL = '$url/api' {
+      {required String username,
+      required this.password,
+      required String url,
+      required this.localDir})
+      : _username = username,
+        baseURL = '$url/api';
+
+  void init() async {
     try {
-      postJsonRequest('$baseURL/user/id', {'usn': username})
-          .then((response) => uid = int.parse(response.body));
+      var response =
+          await postJsonRequest('$baseURL/user/id', {'usn': _username});
+      _uid = int.parse(response.body);
     } on FormatException catch (exception) {
       throw UnsupportedError("Invalid username: ${exception.message}");
     }
 
-    var file = io.File('private_key.pem');
-    file.exists().then((exists) {
-      if (exists) {
-        file
-            .readAsString()
-            .then((keyRepr) => key = CryptoUtils.rsaPrivateKeyFromPem(keyRepr));
-        pubKey = RSAPublicKey(key.modulus!, key.publicExponent!);
-      } else {
-        final key_ = CryptoUtils.generateRSAKeyPair();
-        key = key_.privateKey as RSAPrivateKey;
-        pubKey = key_.publicKey as RSAPublicKey;
-        file.writeAsString(CryptoUtils.encodeRSAPrivateKeyToPem(key));
-      }
-    });
+    var file = io.File('${localDir.toString()}/private_key.pem');
+    // FIXME: I think browsers cannot technically read and store files
+    if (await file.exists()) {
+      key = CryptoUtils.rsaPrivateKeyFromPem(await file.readAsString());
+      pubKey = RSAPublicKey(key.modulus!, key.publicExponent!);
+    } else {
+      final key_ = CryptoUtils.generateRSAKeyPair();
+      key = key_.privateKey as RSAPrivateKey;
+      pubKey = key_.publicKey as RSAPublicKey;
+      await file.writeAsString(CryptoUtils.encodeRSAPrivateKeyToPem(key));
+    }
   }
 
-  void authenticate() {
-    print(postJsonRequest('$baseURL/user/auth', {
-      'usn': username,
+  void authenticate() async {
+    print(await postJsonRequest('$baseURL/user/auth', {
+      'usn': _username,
       'pwd': password,
       'pubKey': CryptoUtils.encodeRSAPublicKeyToPem(pubKey)
     }));
@@ -69,35 +79,45 @@ class LocalUser extends User {
 
 class NonLocalUser extends User {
   late String? _username;
-  @override
-  late final int uid;
+  late int _uid = -1;
   @override
   late final RSAPublicKey pubKey;
   final String baseURL;
 
   // Get username as required
   @override
-  String get username {
+  Future<String> get username async {
     if (_username == null) {
-      postJsonRequest('$baseURL/user/usn', {'uid': uid})
-          .then((response) => _username = response.body);
+      _username =
+          (await postJsonRequest('$baseURL/user/usn', {'uid': _uid})).body;
       return _username!;
     } else {
       return _username!;
     }
   }
 
-  NonLocalUser.usn({required username, required url})
-      : baseURL = '$url/api',
-        _username = username {
-    postJsonRequest('$baseURL/user/id', {'usn': username})
-        .then((response) => uid = int.parse(response.body));
-    postJsonRequest('$baseURL/user/pubKey', {'uid': uid}).then(
-        (response) => pubKey = CryptoUtils.rsaPublicKeyFromPem(response.body));
+  @override
+  Future<int> get uid => Future<int>.value(_uid);
+
+  void initUsn() async {
+    Response response;
+    response = await postJsonRequest('$baseURL/user/id', {'usn': username});
+    _uid = int.parse(response.body);
+    response = await postJsonRequest('$baseURL/user/pubKey', {'uid': _uid});
+    pubKey = CryptoUtils.rsaPublicKeyFromPem(response.body);
   }
 
-  NonLocalUser.uid({required this.uid, required url}) : baseURL = '$url/api' {
-    postJsonRequest('$baseURL/user/pubKey', {'uid': uid}).then(
-        (response) => pubKey = CryptoUtils.rsaPublicKeyFromPem(response.body));
+  NonLocalUser.usn({required username, required url})
+      : baseURL = '$url/api',
+        _username = username;
+
+  void initUid() async {
+    Response response =
+        await postJsonRequest('$baseURL/user/pubKey', {'uid': _uid});
+    pubKey = CryptoUtils.rsaPublicKeyFromPem(response.body);
   }
+
+  NonLocalUser.uid({required int uid, required url})
+      : _uid = uid,
+        baseURL = '$url/api';
 }

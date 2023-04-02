@@ -6,36 +6,44 @@ import 'utility.dart';
 class Bubble {
   late final int bid; // Bubble ID
   //var uids = Future<Map<String, dynamic>>.value({});
-  late List<int> uids; // User IDs
+  List<int> uids = []; // User IDs
+  final User? firstUser;
 
   final String baseURL;
 
-  Bubble.connect({required this.bid, required String url})
-      : baseURL = '$url/api' {
-    uids = fetchUids();
+  void initConnect() async {
+    uids = await fetchUids();
   }
 
-  Bubble.new(String url, User user)
+  Bubble.connect(this.bid, String url)
       : baseURL = '$url/api',
-        uids = [user.uid] {
-    postJsonRequest('$url/bubble/new', {'uid': user.uid})
-        .then((response) => bid = int.parse(response.body));
+        firstUser = null;
+
+  void initNewBubble() async {
+    assert(firstUser != null,
+        "Call the newBubble constructor before this function");
+    var response =
+        await postJsonRequest('$baseURL/bubble/new', {'uid': firstUser!.uid});
+    bid = int.parse(response.body);
+    uids = [await firstUser!.uid];
   }
 
-  List<int> fetchUids() {
-    dynamic uids;
+  Bubble.newBubble(User user, String url)
+      : baseURL = '$url/api',
+        firstUser = user;
+
+  Future<List<int>> fetchUids() async {
+    List<int> uids;
     try {
-      postJsonRequest('$baseURL/bubble/uids', {"bid": bid}).then((response) {
-        var response_ = json.decode(response.body);
-        assert(response_ is List<int>,
-            "bubble uids requested is not list of ints");
-        uids = response;
-        return uids;
-      });
+      var response =
+          await postJsonRequest('$baseURL/bubble/uids', {"bid": bid});
+      assert(json.decode(response.body) is List<int>,
+          "bubble uids requested is not list of ints");
+      uids = json.decode(response.body);
+      return uids;
     } on FormatException {
       throw RoomDoesNotExist();
     }
-    return uids;
   }
 
   void invite(LocalUser user) {

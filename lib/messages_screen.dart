@@ -36,6 +36,9 @@ class MessagesScreen extends StatelessWidget {
                   })),
           SafeArea(
               child: Row(children: [
+            IconButton(
+                icon: const Icon(Icons.refresh),
+                onPressed: () => appState.fetchMessages()),
             Expanded(
                 child: TextField(
                     controller: controller,

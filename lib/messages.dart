@@ -11,19 +11,20 @@ class Messages {
 
   List<List<String>> messages = [];
 
+  void init() {}
+
   Messages({required this.user, required this.bubble, required url})
       : baseURL = '$url/api';
 
-  void retrieve() {
+  void retrieve() async {
     dynamic messages_;
-    postJsonRequest('$baseURL/bubble/messageRequest', {
-      'uid': user.uid,
-      'bid': bubble.bid
-    }).then((response) => messages_ = json.decode(response.body));
+    var response = await postJsonRequest('$baseURL/bubble/messageRequest',
+        {'uid': await user.uid, 'bid': await bubble.bid});
+    messages_ = json.decode(response.body);
     for (var message in messages_) {
       if (message["recipientUID"] == user.uid) {
         messages.add([
-          NonLocalUser.uid(
+          await NonLocalUser.uid(
                   uid: message['authUID'],
                   url: baseURL.substring(0, baseURL.length - '/api'.length))
               .username,
@@ -33,7 +34,7 @@ class Messages {
     }
   }
 
-  void sendMessage(String message) {
+  void sendMessage(String message) async {
     User recipient;
     for (final uid in bubble.uids) {
       recipient = NonLocalUser.uid(
