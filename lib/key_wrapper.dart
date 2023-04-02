@@ -1,6 +1,6 @@
 import 'dart:convert' show json;
 
-import 'package:pointycastle/export.dart';
+import 'package:basic_utils/basic_utils.dart' show RSAPrivateKey, RSAPublicKey;
 
 String encodePrivateKey(RSAPrivateKey key) {
   return json.encode({

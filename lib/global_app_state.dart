@@ -1,8 +1,13 @@
 import 'package:flutter/material.dart';
+import 'package:gui_flutter/messages.dart';
+import 'package:gui_flutter/user.dart';
 
 class GlobalAppState extends ChangeNotifier {
   String? _serverAddress;
   String? _channel;
+
+  late LocalUser user;
+  late Messages messages;
 
   bool get isServerAddressSet => !(_serverAddress == null);
   bool get isChannelSet => !(_channel == null);

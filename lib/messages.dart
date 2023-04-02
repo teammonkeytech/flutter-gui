@@ -15,7 +15,7 @@ class Messages {
       : baseURL = '$url/api';
 
   void retrieve() {
-    var messages_;
+    dynamic messages_;
     postJsonRequest('$baseURL/bubble/messageRequest', {
       'uid': user.uid,
       'bid': bubble.bid

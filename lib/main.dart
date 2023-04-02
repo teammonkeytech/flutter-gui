@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:gui_flutter/global_app_state.dart';
 import 'package:provider/provider.dart';
 
-import 'server_channel_selector.dart';
+import 'selector_screen.dart';
 import 'messages_screen.dart';
 
 void main() {
@@ -61,7 +61,7 @@ class _MyHomePageState extends State<MyHomePage> {
     Widget page;
     switch (selectedIndex) {
       case 0:
-        page = ServerChannelSelector();
+        page = SelectorScreen();
         break;
       case 1:
         page = MessagesScreen();
