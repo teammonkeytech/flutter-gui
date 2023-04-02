@@ -9,7 +9,7 @@ class SelectorScreen extends StatefulWidget {
 
 class _SelectorScreenState extends State<SelectorScreen> {
   List<bool> isSelected = [false, true];
-  final serverAddress = TextEditingController(text: "http://127.0.0.1:5000"),
+  final serverAddress = TextEditingController(text: "http://10.0.2.2:5000"),
       channel = TextEditingController(text: '1'),
       username = TextEditingController(text: "test"),
       password = TextEditingController(text: "test");

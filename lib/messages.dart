@@ -19,7 +19,7 @@ class Messages {
   void retrieve() async {
     dynamic messages_;
     var response = await postJsonRequest('$baseURL/bubble/messageRequest',
-        {'uid': await user.uid, 'bid': await bubble.bid});
+        {'uid': await user.uid, 'bid': bubble.bid});
     messages_ = json.decode(response.body);
     for (var message in messages_) {
       if (message["recipientUID"] == user.uid) {
@@ -50,9 +50,9 @@ class Messages {
   }
 
   List<String>? getMessage(int index) {
-    if (index > messages.length) {
+    if (index >= messages.length) {
       retrieve();
-      return index > messages.length ? null : messages[index];
+      return index >= messages.length ? null : messages[index];
     }
     return messages[index];
   }

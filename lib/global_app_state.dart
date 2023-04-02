@@ -17,25 +17,24 @@ class GlobalAppState extends ChangeNotifier {
 
   late Directory localDir;
 
-  GlobalAppState() {
-    getApplicationDocumentsDirectory().then((dir) => localDir = dir);
-  }
-
   void connectToServer(
       {required String username,
       required String password,
       required String bid,
       required String url,
-      bool newChannel = false}) {
+      bool newChannel = false}) async {
+    localDir = await getApplicationDocumentsDirectory();
+
     user = LocalUser(
         username: username, password: password, url: url, localDir: localDir)
       ..init();
     messages = Messages(
         user: user!,
+        // If a new channel was requested, ask server for a new channel.
+        // Otherwise try connecting to an old channel.
         bubble: newChannel
             ? (Bubble.newBubble(user!, url)..initNewBubble())
-            : Bubble.connect(int.parse(bid), url)
-          ..initConnect(),
+            : (Bubble.connect(int.parse(bid), url)..initConnect()),
         url: url)
       ..init();
     messages?.retrieve();

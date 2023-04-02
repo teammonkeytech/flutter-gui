@@ -5,7 +5,6 @@ import 'utility.dart';
 
 class Bubble {
   late final int bid; // Bubble ID
-  //var uids = Future<Map<String, dynamic>>.value({});
   List<int> uids = []; // User IDs
   final User? firstUser;
 
@@ -37,9 +36,7 @@ class Bubble {
     try {
       var response =
           await postJsonRequest('$baseURL/bubble/uids', {"bid": bid});
-      assert(json.decode(response.body) is List<int>,
-          "bubble uids requested is not list of ints");
-      uids = json.decode(response.body);
+      uids = json.decode(response.body).cast<int>();
       return uids;
     } on FormatException {
       throw RoomDoesNotExist();

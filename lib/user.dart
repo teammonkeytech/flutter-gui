@@ -51,12 +51,13 @@ class LocalUser extends User {
       throw UnsupportedError("Invalid username: ${exception.message}");
     }
 
-    var file = io.File('${localDir.toString()}/private_key.pem');
+    var file = io.File('${localDir.path}/private_key.pem');
     // FIXME: I think browsers cannot technically read and store files
     if (await file.exists()) {
       key = CryptoUtils.rsaPrivateKeyFromPem(await file.readAsString());
       pubKey = RSAPublicKey(key.modulus!, key.publicExponent!);
     } else {
+      await file.create();
       final key_ = CryptoUtils.generateRSAKeyPair();
       key = key_.privateKey as RSAPrivateKey;
       pubKey = key_.publicKey as RSAPublicKey;
