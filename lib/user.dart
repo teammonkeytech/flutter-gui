@@ -38,8 +38,6 @@ class LocalUser extends User {
       throw UnsupportedError("Invalid username: ${exception.message}");
     }
 
-    //postJsonRequest('$baseURL/user/pubKey', {'uid': uid})
-    //    .then((response) => pubKey = decodePublicKey(response.body));
     var file = io.File('private_key.pem');
     file.exists().then((exists) {
       if (exists) {

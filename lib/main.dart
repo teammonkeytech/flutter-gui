@@ -20,7 +20,7 @@ class MyApp extends StatelessWidget {
       child: MaterialApp(
         title: 'Flutter Demo',
         theme: ThemeData(
-          colorScheme: ColorScheme.dark(),
+          colorScheme: const ColorScheme.dark(),
         ),
         home: const MyHomePage(title: 'Flutter Demo Home Page'),
       ),
@@ -81,14 +81,14 @@ class _MyHomePageState extends State<MyHomePage> {
                   onDestinationSelected: (value) {
                     setState(() => selectedIndex = value);
                   },
-                  destinations: [
+                  destinations: const [
                 NavigationRailDestination(
-                  icon: const Icon(Icons.attach_file),
-                  label: const Text('Server/Channel'),
+                  icon: Icon(Icons.attach_file),
+                  label: Text('Server/Channel'),
                 ),
                 NavigationRailDestination(
-                  icon: const Icon(Icons.article),
-                  label: const Text('Text'),
+                  icon: Icon(Icons.article),
+                  label: Text('Text'),
                 ),
               ])),
           Expanded(

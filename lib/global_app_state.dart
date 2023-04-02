@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:gui_flutter/bubble.dart';
 import 'package:gui_flutter/messages.dart';
 import 'package:gui_flutter/user.dart';
 
@@ -6,8 +7,20 @@ class GlobalAppState extends ChangeNotifier {
   String? _serverAddress;
   String? _channel;
 
-  late LocalUser user;
-  late Messages messages;
+  LocalUser? user;
+  Messages? messages;
+
+  void connectToServer(
+      {required String username,
+      required String password,
+      required String bid,
+      required String url,
+      bool newChannel = false}) {
+    user = LocalUser(username: username, password: password, url: url);
+    messages = Messages(user: user!, bubble: Bubble(url, user!), url: url);
+    messages?.retrieve();
+    notifyListeners();
+  }
 
   bool get isServerAddressSet => !(_serverAddress == null);
   bool get isChannelSet => !(_channel == null);
@@ -35,7 +48,7 @@ class GlobalAppState extends ChangeNotifier {
   }
 
   static bool validateChannel(String? channel) {
-    // TODO: Validate channel format
-    return channel != null && channel != "";
+    if (channel == null) return false;
+    return int.tryParse(channel) != null;
   }
 }

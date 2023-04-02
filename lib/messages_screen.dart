@@ -1,36 +1,53 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+import 'package:gui_flutter/global_app_state.dart';
 
 class MessagesScreen extends StatelessWidget {
   final TextEditingController controller = TextEditingController();
 
   @override
   Widget build(BuildContext context) {
+    var appState = context.watch<GlobalAppState>();
+
     return Padding(
-        padding: EdgeInsets.all(12.0),
+        padding: const EdgeInsets.all(12.0),
         child: Column(children: [
           Expanded(
               child: ListView.builder(
                   reverse: true,
-                  // TODO: retrieve messages lazily
-                  itemBuilder: (context, index) => index <= 1
-                      ? Text("A")
-                      : index < 10
-                          ? Text("B")
-                          : null)),
+                  itemBuilder: (context, index) {
+                    var appState = context.watch<GlobalAppState>();
+                    List<String>? message =
+                        appState.messages?.getMessage(index);
+                    if (message == null) return null;
+                    return Row(
+                      children: [
+                        const Icon(Icons.keyboard_arrow_right),
+                        Expanded(
+                            child: Column(children: [
+                          Text(
+                            message[0],
+                            selectionColor: const Color(0xFFFF0000),
+                          ),
+                          Text(message[1]),
+                        ]))
+                      ],
+                    );
+                  })),
           SafeArea(
               child: Row(children: [
             Expanded(
                 child: TextField(
                     controller: controller,
                     onSubmitted: (value) {
-                      // TODO: submit text in `controller`
+                      appState.messages?.sendMessage(controller.text);
                       print(controller.text);
                       controller.clear();
                     })),
             IconButton(
-              icon: Icon(Icons.arrow_circle_up),
+              icon: const Icon(Icons.arrow_circle_up),
               onPressed: () {
-                // TODO: submit text in `controller`
+                appState.messages?.sendMessage(controller.text);
                 print(controller.text);
                 controller.clear();
               },
