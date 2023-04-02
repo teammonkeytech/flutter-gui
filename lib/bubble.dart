@@ -1,47 +1,51 @@
-import 'dart:convert';
+import 'dart:convert' show json;
 
-import 'constants.dart';
-import 'utility.dart';
 import 'user.dart';
-import 'message.dart' show Message;
+import 'utility.dart';
 
 class Bubble {
-  int? bid; // Bubble ID
-  var uids = Future<Map<String, dynamic>>.value({});
+  late final int bid; // Bubble ID
+  //var uids = Future<Map<String, dynamic>>.value({});
+  late List<int> uids; // User IDs
 
-  static const baseURL = 'http://$hostname:$port/api';
+  final String baseURL;
 
-  Bubble({this.bid}) {
-    if (bid != null) {
-      connect();
+  Bubble.connect({required this.bid, required String url})
+      : baseURL = '$url/api' {
+    uids = fetchUids();
+  }
+
+  Bubble.new(String url, User user)
+      : baseURL = '$url/api',
+        uids = [user.uid] {
+    postJsonRequest('$url/bubble/new', {'uid': user.uid})
+        .then((response) => bid = int.parse(response.body));
+  }
+
+  List<int> fetchUids() {
+    dynamic uids;
+    try {
+      postJsonRequest('$baseURL/bubble/uids', {"bid": bid}).then((response) {
+        var response_ = json.decode(response.body);
+        assert(response_ is List<int>,
+            "bubble uids requested is not list of ints");
+        uids = response;
+        return uids;
+      });
+    } on FormatException {
+      throw RoomDoesNotExist();
     }
+    return uids;
   }
 
-  int? get getBid => bid;
-  Future<Map<String, dynamic>> get getUids async =>
-      (await uids).isEmpty ? connect() : uids;
-
-  Future<Map<String, dynamic>> connect() async {
-    uids = postJsonRequest('$baseURL/bubble/uids', {"bid": bid})
-        .then((response) => json.decode(response.body));
-    return await uids;
-  }
-
-  Future<void> invite(User user) async {
-    var status = postJsonRequest(
-        '$baseURL/bubble/invite', {'bid': getBid, 'uid': user.getUid});
-    print((await status).body);
-  }
-
-  void newBubble(User user) async {
-    bid = int.parse(
-        (await postJsonRequest('$baseURL/bubble/new', {'uid': user.getUid}))
-            .body);
-  }
-
-  msgRequest(LocalUser localUser) {
-    var data = {'uid': localUser.getUid, 'bid': getBid};
-    var msgs = postJsonRequest('$baseURL/bubble/messageRequest', data);
-    // TODO: Finish function
+  void invite(LocalUser user) {
+    postJsonRequest('$baseURL/bubble/invite', {'bid': bid, 'uid': user.uid})
+        .then((response) {
+      if (response.body == "Bubble $bid not found") {
+        throw RoomDoesNotExist();
+      }
+    });
   }
 }
+
+class RoomDoesNotExist implements Exception {}

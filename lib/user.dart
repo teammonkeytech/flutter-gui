@@ -1,74 +1,105 @@
-import 'package:http/http.dart' show Response;
-import 'package:cryptography/cryptography.dart';
-import 'package:rsa_pkcs/rsa_pkcs.dart';
-import 'dart:convert';
+import 'dart:io' as io;
 
-//import 'package:pointycastle';
+import 'package:basic_utils/basic_utils.dart'
+    show CryptoUtils, RSAPublicKey, RSAPrivateKey;
 
-import 'constants.dart';
 import 'utility.dart';
 
-class LocalUser extends User {
-  static const baseURL = 'http://$hostname:$port/api';
-  // Inherited: String usn
-  String pwd;
-  var signer = RsaSsaPkcs1v15.sha256();
+abstract class User {
+  String get username;
+  int get uid;
+  RSAPublicKey get pubKey;
 
-  RsaKeyPair keys;
-
-  LocalUser({required String usn, required this.pwd, required this.keys})
-      : super(usn: usn, uid: null, pubKey: keys.extractPublicKey());
-
-  RsaKeyPair get getKeys => keys;
-  String get getPwd => pwd;
-
-  void auth() async {
-    // login/authenticate
-    pubKey = keys.extractPublicKey();
-    var pg = await postJsonRequest('$baseURL/user/auth',
-        {"usn": await getUsn, "pwd": getPwd, "pubKey": getPubKey});
-    print(pg.body);
-  }
-
-  Future<Response> postRequest(String path, Map<String, dynamic> data) async {
-    // TODO: Write function
-    var signer = RsaSsaPkcs1v15.sha256();
-    var signature = await signer.signString(json.encode(data),
-        keyPair: await keys.extract());
-    //return Future<Response>.value(Response('h', 200));
-    return postJsonRequest('$protocol://$hostname:$port/$path',
-        {'uid': getUid, 'apiSig': base64.encode(signature.bytes)});
-  }
-
-  Future<String> sign(String content) async {
-    var encoded = utf8.encode(content);
-    var algorithm = Sha256();
-    var hash = await algorithm.hash(encoded);
-    return base64.encode(hash.bytes);
+  String encrypt(String ciphertext) {
+    return CryptoUtils.rsaEncrypt(ciphertext, pubKey);
   }
 }
 
-class User {
-  static const baseURL = 'http://$hostname:$port/api';
-  Future<String> usn;
-  Future<int> uid; // User ID
+class LocalUser extends User {
+  @override
+  final String username;
+  @override
+  late final int uid;
 
-  Future<RsaPublicKey> pubKey;
+  final String baseURL;
 
-  User({String? usn, int? uid, Future<RsaPublicKey>? pubKey})
-      : usn = usn != null
-            ? Future<String>.value(usn)
-            : postJsonRequest('$baseURL/user/usn', {'uid': uid})
-                .then((response) => response.body),
-        uid = uid != null
-            ? Future<int>.value(uid)
-            : postJsonRequest('$baseURL/user/id', {'usn': usn})
-                .then((response) => int.parse(response.body)),
-        pubKey = pubKey ??
-            postJsonRequest('$baseURL/user/pubKey', {'uid': uid})
-                .then((response) => response.body as RsaPublicKey);
+  late final RSAPrivateKey key;
+  @override
+  late final RSAPublicKey pubKey;
+  final String password;
 
-  Future<RsaPublicKey> get getPubKey => pubKey;
-  Future<int> get getUid => uid;
-  Future<String> get getUsn => usn;
+  LocalUser(
+      {required this.username, required this.password, required String url})
+      : baseURL = '$url/api' {
+    try {
+      postJsonRequest('$baseURL/user/id', {'usn': username})
+          .then((response) => uid = int.parse(response.body));
+    } on FormatException catch (exception) {
+      throw UnsupportedError("Invalid username: ${exception.message}");
+    }
+
+    //postJsonRequest('$baseURL/user/pubKey', {'uid': uid})
+    //    .then((response) => pubKey = decodePublicKey(response.body));
+    var file = io.File('private_key.pem');
+    file.exists().then((exists) {
+      if (exists) {
+        file
+            .readAsString()
+            .then((keyRepr) => key = CryptoUtils.rsaPrivateKeyFromPem(keyRepr));
+        pubKey = RSAPublicKey(key.modulus!, key.publicExponent!);
+      } else {
+        final key_ = CryptoUtils.generateRSAKeyPair();
+        key = key_.privateKey as RSAPrivateKey;
+        pubKey = key_.publicKey as RSAPublicKey;
+        file.writeAsString(CryptoUtils.encodeRSAPrivateKeyToPem(key));
+      }
+    });
+  }
+
+  void authenticate() {
+    print(postJsonRequest('$baseURL/user/auth', {
+      'usn': username,
+      'pwd': password,
+      'pubKey': CryptoUtils.encodeRSAPublicKeyToPem(pubKey)
+    }));
+  }
+
+  String decrypt(String ciphertext) {
+    return CryptoUtils.rsaDecrypt(ciphertext, key);
+  }
+}
+
+class NonLocalUser extends User {
+  late String? _username;
+  @override
+  late final int uid;
+  @override
+  late final RSAPublicKey pubKey;
+  final String baseURL;
+
+  // Get username as required
+  @override
+  String get username {
+    if (_username == null) {
+      postJsonRequest('$baseURL/user/usn', {'uid': uid})
+          .then((response) => _username = response.body);
+      return _username!;
+    } else {
+      return _username!;
+    }
+  }
+
+  NonLocalUser.usn({required username, required url})
+      : baseURL = '$url/api',
+        _username = username {
+    postJsonRequest('$baseURL/user/id', {'usn': username})
+        .then((response) => uid = int.parse(response.body));
+    postJsonRequest('$baseURL/user/pubKey', {'uid': uid}).then(
+        (response) => pubKey = CryptoUtils.rsaPublicKeyFromPem(response.body));
+  }
+
+  NonLocalUser.uid({required this.uid, required url}) : baseURL = '$url/api' {
+    postJsonRequest('$baseURL/user/pubKey', {'uid': uid}).then(
+        (response) => pubKey = CryptoUtils.rsaPublicKeyFromPem(response.body));
+  }
 }
