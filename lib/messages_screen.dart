@@ -16,39 +16,29 @@ class MessagesScreen extends StatelessWidget {
               child: ListView.builder(
                   reverse: true,
                   itemBuilder: (context, index) {
-                    print("Building items");
-                    //var appState = context.watch<GlobalAppState>();
+                    var appState = context.watch<GlobalAppState>();
                     List<String>? message =
                         appState.messages?.getMessage(index);
                     if (message == null) return null;
-                    return Container(
-                      margin: const EdgeInsets.all(1.0),
-                      padding: const EdgeInsets.all(2.0),
-                      decoration: BoxDecoration(
-                          border: Border.all(color: Colors.blueAccent)),
-                      child: Row(
-                        children: [
-                          const Icon(Icons.keyboard_arrow_right),
-                          Expanded(
-                              child: Column(children: [
-                            Text(
-                              '$index; ${message[0]}',
-                              selectionColor: const Color(0xFFFF0000),
-                            ),
-                            Text(message[1]),
-                          ]))
-                        ],
-                      ),
+                    return Row(
+                      children: [
+                        const Icon(Icons.keyboard_arrow_right),
+                        Expanded(
+                            child: Column(children: [
+                          Text(
+                            message[0],
+                            selectionColor: const Color(0xFFFF0000),
+                          ),
+                          Text(message[1]),
+                        ]))
+                      ],
                     );
                   })),
           SafeArea(
               child: Row(children: [
             IconButton(
                 icon: const Icon(Icons.refresh),
-                onPressed: () {
-                  print("Refresh requested");
-                  appState.fetchMessages();
-                }),
+                onPressed: () => appState.fetchMessages()),
             Expanded(
                 child: TextField(
                     controller: controller,

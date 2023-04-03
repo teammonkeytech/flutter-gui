@@ -1,7 +1,5 @@
 import 'dart:convert' show json;
 
-import 'package:mutex/mutex.dart';
-
 import 'bubble.dart';
 import 'user.dart';
 import 'utility.dart';
@@ -11,8 +9,6 @@ class Messages {
   final Bubble bubble;
   final String baseURL;
 
-  final mutex = Mutex();
-
   List<List<String>> messages = [];
 
   Future<void> init() async {}
@@ -21,28 +17,26 @@ class Messages {
       : baseURL = '$url/api';
 
   Future<void> retrieve() async {
-    await mutex.protect(() async {
-      messages = [];
-      final List<dynamic> messages_;
-      NonLocalUser nonLocalUser;
-      var response = await postJsonRequest('$baseURL/bubble/messageRequest',
-          {'uid': await user.uid, 'bid': bubble.bid});
-      messages_ = json.decode(response.body);
-      print("Retrieved ${messages_.length} messages");
-      for (final message in messages_) {
-        if (message["recipientUID"] == await user.uid) {
-          nonLocalUser = NonLocalUser.uid(
-              uid: message['authUID'],
-              url: baseURL.substring(0, baseURL.length - '/api'.length));
-          await nonLocalUser.initUid();
-          messages.add(
-              [await nonLocalUser.username, user.decrypt(message['content'])]);
-        }
+    print("retrieving");
+    dynamic messages_;
+    NonLocalUser nonLocalUser;
+    var response = await postJsonRequest('$baseURL/bubble/messageRequest',
+        {'uid': await user.uid, 'bid': bubble.bid});
+    messages_ = json.decode(response.body);
+    for (var message in messages_) {
+      print(
+          'recipient uid: ${message["recipientUID"]}, ${message["recipientUID"].runtimeType}');
+      print("user.uid: ${user.uid}");
+      if (message["recipientUID"] == await user.uid) {
+        print("message: $message");
+        nonLocalUser = NonLocalUser.uid(
+            uid: message['authUID'],
+            url: baseURL.substring(0, baseURL.length - '/api'.length));
+        await nonLocalUser.initUid();
+        messages.add(
+            [await nonLocalUser.username, user.decrypt(message['content'])]);
       }
-      print("Processed ${messages.length} messages");
-      print(messages);
-      print(messages_.length);
-    });
+    }
   }
 
   void sendMessage(String message) async {
