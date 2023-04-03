@@ -10,7 +10,7 @@ class Bubble {
 
   final String baseURL;
 
-  void initConnect() async {
+  Future<void> initConnect() async {
     uids = await fetchUids();
   }
 
@@ -18,13 +18,15 @@ class Bubble {
       : baseURL = '$url/api',
         firstUser = null;
 
-  void initNewBubble() async {
+  Future<void> initNewBubble() async {
     assert(firstUser != null,
         "Call the newBubble constructor before this function");
-    var response =
-        await postJsonRequest('$baseURL/bubble/new', {'uid': firstUser!.uid});
+    var response = await postJsonRequest(
+        '$baseURL/bubble/new', {'uid': await firstUser!.uid});
+    print('New bubble: ${response.body}');
     bid = int.parse(response.body);
     uids = [await firstUser!.uid];
+    await fetchUids();
   }
 
   Bubble.newBubble(User user, String url)
@@ -37,6 +39,7 @@ class Bubble {
       var response =
           await postJsonRequest('$baseURL/bubble/uids', {"bid": bid});
       uids = json.decode(response.body).cast<int>();
+      print("fetched uids: $uids");
       return uids;
     } on FormatException {
       throw RoomDoesNotExist();

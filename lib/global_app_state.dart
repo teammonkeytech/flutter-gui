@@ -22,22 +22,29 @@ class GlobalAppState extends ChangeNotifier {
       required String password,
       required String bid,
       required String url,
-      bool newChannel = false}) async {
+      required bool newChannel}) async {
     localDir = await getApplicationDocumentsDirectory();
 
     user = LocalUser(
-        username: username, password: password, url: url, localDir: localDir)
-      ..init();
+        username: username, password: password, url: url, localDir: localDir);
+    await user?.init();
+    Bubble bubble;
+    if (newChannel) {
+      bubble = Bubble.newBubble(user!, url);
+      await bubble.initNewBubble();
+    } else {
+      bubble = Bubble.connect(int.parse(bid), url);
+      await bubble.initConnect();
+    }
     messages = Messages(
         user: user!,
         // If a new channel was requested, ask server for a new channel.
         // Otherwise try connecting to an old channel.
-        bubble: newChannel
-            ? (Bubble.newBubble(user!, url)..initNewBubble())
-            : (Bubble.connect(int.parse(bid), url)..initConnect()),
-        url: url)
-      ..init();
+        bubble: bubble,
+        url: url);
+    await messages?.init();
     messages?.retrieve();
+    print("inited");
     notifyListeners();
   }
 
