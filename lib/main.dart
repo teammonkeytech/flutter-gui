@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
-import 'package:gui_flutter/GlobalAppState.dart';
+import 'package:gui_flutter/global_app_state.dart';
 import 'package:provider/provider.dart';
 
-import 'ServerChannelSelector.dart';
-import 'MessagesScreen.dart';
+import 'selector_screen.dart';
+import 'messages_screen.dart';
 
 void main() {
   runApp(const MyApp());
@@ -20,7 +20,7 @@ class MyApp extends StatelessWidget {
       child: MaterialApp(
         title: 'Flutter Demo',
         theme: ThemeData(
-          colorScheme: ColorScheme.dark(),
+          colorScheme: const ColorScheme.dark(),
         ),
         home: const MyHomePage(title: 'Flutter Demo Home Page'),
       ),
@@ -61,7 +61,7 @@ class _MyHomePageState extends State<MyHomePage> {
     Widget page;
     switch (selectedIndex) {
       case 0:
-        page = ServerChannelSelector();
+        page = SelectorScreen();
         break;
       case 1:
         page = MessagesScreen();
@@ -81,14 +81,14 @@ class _MyHomePageState extends State<MyHomePage> {
                   onDestinationSelected: (value) {
                     setState(() => selectedIndex = value);
                   },
-                  destinations: [
+                  destinations: const [
                 NavigationRailDestination(
-                  icon: const Icon(Icons.attach_file),
-                  label: const Text('Server/Channel'),
+                  icon: Icon(Icons.attach_file),
+                  label: Text('Server/Channel'),
                 ),
                 NavigationRailDestination(
-                  icon: const Icon(Icons.article),
-                  label: const Text('Text'),
+                  icon: Icon(Icons.article),
+                  label: Text('Text'),
                 ),
               ])),
           Expanded(
