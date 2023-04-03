@@ -1,5 +1,4 @@
-import 'dart:convert' show json;
-import 'dart:convert' show base64, utf8;
+import 'dart:convert' show json, base64, utf8;
 import 'package:basic_utils/basic_utils.dart'
     show CryptoUtils, RSAPublicKey, RSAPrivateKey;
 import 'package:http/http.dart' show post, Response;
