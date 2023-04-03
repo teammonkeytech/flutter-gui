@@ -4,10 +4,14 @@ import 'bubble.dart';
 import 'user.dart';
 import 'utility.dart';
 
+import 'package:mutex/mutex.dart';
+
 class Messages {
   final LocalUser user;
   final Bubble bubble;
   final String baseURL;
+
+  var mutex = Mutex();
 
   List<List<String>> messages = [];
 
@@ -17,26 +21,25 @@ class Messages {
       : baseURL = '$url/api';
 
   Future<void> retrieve() async {
-    print("retrieving");
-    dynamic messages_;
-    NonLocalUser nonLocalUser;
-    var response = await postJsonRequest('$baseURL/bubble/messageRequest',
-        {'uid': await user.uid, 'bid': bubble.bid});
-    messages_ = json.decode(response.body);
-    for (var message in messages_) {
-      print(
-          'recipient uid: ${message["recipientUID"]}, ${message["recipientUID"].runtimeType}');
-      print("user.uid: ${user.uid}");
-      if (message["recipientUID"] == await user.uid) {
-        print("message: $message");
-        nonLocalUser = NonLocalUser.uid(
-            uid: message['authUID'],
-            url: baseURL.substring(0, baseURL.length - '/api'.length));
-        await nonLocalUser.initUid();
-        messages.add(
-            [await nonLocalUser.username, user.decrypt(message['content'])]);
+    await mutex.protect(() async {
+      print("retrieving");
+      dynamic messages_;
+      NonLocalUser nonLocalUser;
+      var response = await postJsonRequest('$baseURL/bubble/messageRequest',
+          {'uid': await user.uid, 'bid': bubble.bid});
+      messages_ = json.decode(response.body);
+      messages = [];
+      for (final message in messages_) {
+        if (message["recipientUID"] == await user.uid) {
+          nonLocalUser = NonLocalUser.uid(
+              uid: message['authUID'],
+              url: baseURL.substring(0, baseURL.length - '/api'.length));
+          await nonLocalUser.initUid();
+          messages.insert(0,
+              [await nonLocalUser.username, user.decrypt(message['content'])]);
+        }
       }
-    }
+    });
   }
 
   void sendMessage(String message) async {

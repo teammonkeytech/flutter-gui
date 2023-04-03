@@ -17,6 +17,7 @@ class MessagesScreen extends StatelessWidget {
                   reverse: true,
                   itemBuilder: (context, index) {
                     var appState = context.watch<GlobalAppState>();
+                    print("building");
                     List<String>? message =
                         appState.messages?.getMessage(index);
                     if (message == null) return null;
@@ -50,8 +51,6 @@ class MessagesScreen extends StatelessWidget {
             IconButton(
               icon: const Icon(Icons.arrow_circle_up),
               onPressed: () {
-                print(appState.messages == null);
-                print(appState.messages?.bubble.uids);
                 appState.messages?.sendMessage(controller.text);
                 print(controller.text);
                 controller.clear();
