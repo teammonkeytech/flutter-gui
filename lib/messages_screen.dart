@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:gui_flutter/global_app_state.dart';
+
+import 'global_app_state.dart';
+import 'messages.dart';
 
 class MessagesScreen extends StatelessWidget {
   final TextEditingController controller = TextEditingController();
@@ -18,8 +20,8 @@ class MessagesScreen extends StatelessWidget {
                   itemBuilder: (context, index) {
                     print("Building items");
                     //var appState = context.watch<GlobalAppState>();
-                    List<String>? message =
-                        appState.messages?.getMessage(index);
+                    Messages? messages = appState.messages;
+                    List<String>? message = messages?.getMessage(index);
                     if (message == null) return null;
                     return Container(
                       margin: const EdgeInsets.all(1.0),

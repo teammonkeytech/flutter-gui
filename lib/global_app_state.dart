@@ -50,7 +50,8 @@ class GlobalAppState extends ChangeNotifier {
 
   void fetchMessages() {
     messages?.retrieve();
-    notifyListeners();
+    print("Fetching messages");
+    if (messages != null) notifyListeners();
   }
 
   bool get isServerAddressSet => !(_serverAddress == null);

@@ -35,10 +35,11 @@ class Messages {
               uid: message['authUID'],
               url: baseURL.substring(0, baseURL.length - '/api'.length));
           await nonLocalUser.initUid();
-          messages.add(
+          messages.insert(0,
               [await nonLocalUser.username, user.decrypt(message['content'])]);
         }
       }
+      //messages = messages.reversed as List<List<String>>;
       print("Processed ${messages.length} messages");
       print(messages);
       print(messages_.length);
